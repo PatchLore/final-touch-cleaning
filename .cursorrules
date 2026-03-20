@@ -1,0 +1,43 @@
+# CleanSlate Pro — Cursor AI Rules
+
+## Project overview
+End-of-tenancy cleaning automation platform. Next.js 14 App Router + TypeScript + Tailwind.
+AI agent runs via NemoClaw (local sandbox) connecting to Nemotron 3 Super via NVIDIA cloud.
+
+## Architecture
+- `app/` — Next.js pages and API routes (App Router)
+- `lib/agent.ts` — All NemoClaw/OpenClaw communication lives here
+- `lib/store.ts` — In-memory data store (replace with Prisma for production)
+- `lib/email.ts` — Nodemailer email sending
+
+## Key rules when editing
+1. All AI agent calls go through `lib/agent.ts` — never call NemoClaw directly from pages
+2. The agent always has a fallback (rule-based) path so the app works without NemoClaw running
+3. Use `'use client'` only when needed (forms, state, interactivity)
+4. All API routes are in `app/api/*/route.ts`
+5. Brand colour is `brand-600` (#16a34a green) — use Tailwind `brand-*` classes
+
+## NemoClaw connection
+- Local URL: `http://localhost:3284` (set in .env.local as NEMOCLAW_API_URL)  
+- Session ID: `tenancy-agent`
+- The agent runs Nemotron 3 Super via NVIDIA cloud through the NemoClaw privacy proxy
+- If NemoClaw isn't running, `askAgent()` returns `'__FALLBACK__'` and rule-based logic kicks in
+
+## Adding new features
+- New pages: add to `app/[page-name]/page.tsx`
+- New API endpoints: add to `app/api/[endpoint]/route.ts`
+- New agent tasks: add a function to `lib/agent.ts` following the pattern of `generateQuote()`
+
+## Styling
+- Tailwind CSS only — no CSS modules, no styled-components
+- Brand green: `brand-600` for buttons, `brand-50/100` for backgrounds
+- Consistent border radius: `rounded-xl` for cards, `rounded-lg` for inputs
+- Status badges use the CSS classes in `globals.css` (status-new, status-booked, etc.)
+
+## When adding a database (production)
+Replace `lib/store.ts` with Prisma:
+```bash
+npm install prisma @prisma/client
+npx prisma init --datasource-provider sqlite
+```
+Then update all imports from `@/lib/store` to use Prisma client.
